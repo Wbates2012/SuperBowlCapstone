@@ -1,4 +1,5 @@
 {
+    "videodir": "videos",
     "audiodir": "audios",
     "cleandatadir": "data_clean.csv"
     "outdir": "data/fxt"
