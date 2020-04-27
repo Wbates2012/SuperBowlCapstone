@@ -27,6 +27,11 @@ def main():
         
     if 'test' in argv:
         cfg = json.load(open('config/test-params.json'))
+        year = cfg['year']
+        superdata = cfg['superdata']
+        otherdata = cfg['otherdata']
+        datapath = cfg['datapath']
+        vid.dataframe_processor(year, superdata, otherdata, datapath)
         ifx.extract(cfg['videodir'], cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
         
 if __name__ == "__main__":
