@@ -25,5 +25,9 @@ def main():
         cfg = json.load(open('config/fxt-params.json'))
         ifx.extract(cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
         
+    if 'test' in argv:
+        cfg = json.load(open('config/test-params.json'))
+        ifx.extract(cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
+        
 if __name__ == "__main__":
     main()
