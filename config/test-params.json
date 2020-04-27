@@ -3,8 +3,8 @@
     "superdata": "videos",
     "otherdata": "videos",
     "datapath": "testdata",
-    "videodir": "test/videos",
-    "audiodir": "test/audios",
-    "cleandatadir": "test/data",
-    "outdir": "test/audiofeats"
+    "videodir": "testdata/videos",
+    "audiodir": "testdata/audios",
+    "cleandatadir": "testdata/dataframe.csv",
+    "outdir": "testdata/audiofeats"
 }
