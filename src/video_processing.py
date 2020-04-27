@@ -79,7 +79,8 @@ def video_features(video, info):
     return videofeatures
 
 
-def dataframe_processor(rawdataframe, datapath):
+def dataframe_processor(year, superdata, otherdata, datapath):
+    rawdataframe = get_dataframe(year, superdata, otherdata, datapath)
     videodata = pd.DataFrame()
     info = pd.Series()
     for i in rawdataframe["filepath"]:
