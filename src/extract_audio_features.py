@@ -1,6 +1,14 @@
-# Given a directory of mp3 files
+import numpy as np
+import pandas as pd
+import os
+import ast
+import librosa
 
-
+from moviepy.editor import *
+import speech_recognition as sr
+from os import path
+from pydub import AudioSegment
+from sklearn.impute import SimpleImputer
 
 def transcribe(mp3):
                                                          
