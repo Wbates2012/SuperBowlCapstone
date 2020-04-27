@@ -95,9 +95,17 @@ def feature_extract(mp3_file, wordrate, charrate, sb=1.0, n_mfcc=20):
 
 ########################
 
-def extract(audiodir, cleandatadir, outdir):
+def extract(videodir, audiodir, cleandatadir, outdir):
     
     data = pd.read_csv(cleandatadir, index_col=0)
+    
+    for v in os.listdir(videopath):
+        path = os.path.join(videopath, v)
+        video = VideoFileClip(path)
+        audio = video.audio
+        audioname = v[:-4] + '.mp3'
+        audiofn = os.path.join(audiodir, audioname)
+        audio.write_audiofile(audiofn)
     
     texts = list()
     for a in os.listdir(audiodir):
