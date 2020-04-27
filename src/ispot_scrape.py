@@ -50,6 +50,9 @@ def extract_data(link):
     inner.append(
         soup.find_all("meta", {"name": "ad_est_lastoccur"})[0]["content"]
     )  # Last occurance date
+    inner.append(
+        soup.find_all("div", {"class": "col-12 mb-3 pl-0"})[0].find("a").text.strip()
+    ) # Brand Name
 
     return inner
 
@@ -66,6 +69,7 @@ def create_df(data):
             "Subcategory ID",
             "First Occurance",
             "Last Occurance",
+            "Brand"
         ],
     )
 
@@ -81,7 +85,7 @@ def scrape_ispot(year, datapath, superdata):
             os.makedirs(datapath)
     video_pages = get_page_links(year)
 
-    data = []
+    data = list()
     for url in video_pages:
         data.append(extract_data(url))
     df = create_df(data)
