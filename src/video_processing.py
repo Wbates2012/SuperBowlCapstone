@@ -10,6 +10,7 @@ from scenedetect.scene_manager import SceneManager
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.detectors import ContentDetector
 
+
 def get_dataframe(year, superdata, otherdata, datapath):
     df = pd.read_csv(
         ("%s/dataframe.csv" % (datapath)), index_col=0, keep_default_na=False
@@ -21,9 +22,10 @@ def get_dataframe(year, superdata, otherdata, datapath):
         ]
     ]
     df["filepath"] = [
-         os.path.join(datapath, otherdata, str(i) + ".mp4") for i in df.index
+        os.path.join(datapath, otherdata, str(i) + ".mp4") for i in df.index
     ]
     return df
+
 
 def hsv_image(img):
     if img.ndim > 2:
@@ -37,8 +39,10 @@ def hsv_image(img):
         value_img = img
     return hue_img, saturation_img, value_img
 
+
 def averaged(img):
     return np.mean(img, axis=(0, 1))
+
 
 def jumpcuts(video):
     video_manager = VideoManager([video])
@@ -50,12 +54,13 @@ def jumpcuts(video):
     scene_list = scene_manager.get_scene_list(video_manager.get_base_timecode())
     return len(scene_list)
 
+
 def video_features(video, info):
     rawvideofeatures = pd.DataFrame()
     cap = cv2.VideoCapture(video)
     num_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     frame_count = 0
-    while(frame_count < num_frames):
+    while frame_count < num_frames:
         ret, frame = cap.read()
         if frame_count % 60 == 0:
             info = pd.Series()
@@ -65,14 +70,14 @@ def video_features(video, info):
             info["mean saturation"] = averaged(saturation_img)
             info["mean brightness"] = averaged(value_img)
             rawvideofeatures = rawvideofeatures.append(info)
-        
         frame_count += 1
     cap.release()
     cv2.destroyAllWindows()
     videofeatures = info
     videofeatures.append(rawvideofeatures.mean())
-    videofeatures['Number of Jump Cuts'] = jumpcuts(video)
+    videofeatures["Number of Jump Cuts"] = jumpcuts(video)
     return videofeatures
+
 
 def dataframe_processor(rawdataframe, datapath):
     videodata = pd.DataFrame()
@@ -83,6 +88,5 @@ def dataframe_processor(rawdataframe, datapath):
         info.name = i
         info = video_features(i, info)
         videodata = videodata.append(info)
-        
     videodata.to_csv("%s/nonsuper_dataframe.csv" % (datapath))
     return videodata

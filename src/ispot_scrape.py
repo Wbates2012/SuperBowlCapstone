@@ -52,7 +52,7 @@ def extract_data(link):
     )  # Last occurance date
     inner.append(
         soup.find_all("div", {"class": "col-12 mb-3 pl-0"})[0].find("a").text.strip()
-    ) # Brand Name
+    )  # Brand Name
 
     return inner
 
@@ -69,7 +69,7 @@ def create_df(data):
             "Subcategory ID",
             "First Occurance",
             "Last Occurance",
-            "Brand"
+            "Brand",
         ],
     )
 

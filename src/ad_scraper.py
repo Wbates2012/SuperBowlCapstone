@@ -5,7 +5,6 @@ import pandas as pd
 import os
 
 
-
 def get_video_content(link, name, datapath, otherdata):
     print(link)
     source = requests.get(link)
@@ -50,25 +49,33 @@ def related_videos(brand, year, otherdata, datapath, test):
         os.mkdir(otherdata)
     for i in links:
         pagedata = pd.read_html(i)[0]
-        metadata = (
-            pagedata.set_index(0)
-            .T.iloc[0][
-                ["Title", "Agency", "Campaign", "Advertiser", "Brand", "Length"]
-            ]
-        )
+        metadata = pagedata.set_index(0).T.iloc[0][
+            ["Title", "Agency", "Campaign", "Advertiser", "Brand", "Length"]
+        ]
         metadata["Year"] = year
-        metadata['URL'] = i
+        metadata["URL"] = i
         metadata = metadata.groupby(metadata.index).first()
         data = data.append(metadata, sort=False)
     data.to_csv("%s/dataframe.csv" % (datapath))
 
-def all_videos(year, otherdata, datapath, Test=False):
+
+def download_videos(otherdata, datapath):
+    sampler = pd.read_csv(
+        ("%s/dataframe.csv" % (datapath)), index_col=0, keep_default_na=False
+    )
+    sampler = sampler.reset_index(drop=True)
+    sampler.to_csv("%s/dataframe.csv" % (datapath))
+    for i, j in sampler.iterrows():
+        get_video_content(j["URL"], i, datapath, otherdata)
+
+
+def all_videos(year, otherdata, datapath):
     superdf = pd.read_csv(
         ("%s/%s.csv" % (datapath, year)), index_col=0, keep_default_na=False
     )
-    for i in superdf['Brand'].unique():
+    for i in superdf["Brand"].unique():
         if int(year) < 2020:
-            related_videos(i, int(year)+1, otherdata, datapath)
+            related_videos(i, int(year) + 1, otherdata, datapath)
         related_videos(i, int(year), otherdata, datapath)
-        related_videos(i, int(year)-1, otherdata, datapath)
-    download_videos(otherdata, datapath, Test)
+        related_videos(i, int(year) - 1, otherdata, datapath)
+    download_videos(otherdata, datapath)
