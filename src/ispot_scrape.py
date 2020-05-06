@@ -31,7 +31,7 @@ def extract_data(link):
     soup = BeautifulSoup(doc.text)
 
     if len(soup.find_all("div", {"class": "jwplayer"})) < 1:  # Check if video exists
-        return np.full(8, np.NaN)  # If not, return NaNs
+        return np.full(9, np.NaN)  # If not, return NaNs
     inner = [soup.find_all("div", {"class": "jwplayer"})[0]["data-mp4"]]  # Video link
     inner.append(soup.find_all("meta", {"itemprop": "name"})[0]["content"])  # Title
     inner.append(
