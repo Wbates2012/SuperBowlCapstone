@@ -25,7 +25,7 @@ def get_video_content(link, name, datapath, otherdata):
         print("Error with url: " + str(videourl))
 
 
-def related_videos(brand, year, otherdata, datapath, test):
+def related_videos(brand, year, otherdata, datapath):
     inputurl = "https://www.adforum.com/creative-work/search?brand=%s&media_strkey=ATX100&location=country_strkey:COU149&yearange=%s-%s&o=relevance"
     baseurl = "https://www.adforum.com"
     formattedurl = inputurl % (brand, year, year)
