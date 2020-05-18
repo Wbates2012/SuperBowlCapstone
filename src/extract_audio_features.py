@@ -96,20 +96,25 @@ def feature_extract(mp3_file, wordrate, charrate, sb=1.0, n_mfcc=20):
 ########################
 
 
-def extract(videodir, audiodir, cleandatadir, outdir):
+def extract(datapath, videodir, audiodir):
 
-    data = pd.read_csv(cleandatadir, index_col=0)
+    feature_filename = "%s features.csv" % (videodir)
+    feature_filename = os.path.join(datapath, feature_filename)
+    data = pd.read_csv(feature_filename, index_col=0)
 
-    for v in os.listdir(videopath):
-        path = os.path.join(videopath, v)
-        video = VideoFileClip(path)
+    directory = os.path.join(datapath, videodir)
+    files = [os.path.join(directory, i) for i in os.listdir(directory)]
+    curraudiodir = os.path.join(directory, audiodir)
+
+    for v in files:
+        video = VideoFileClip(v)
         audio = video.audio
         audioname = v[:-4] + ".mp3"
-        audiofn = os.path.join(audiodir, audioname)
+        audiofn = os.path.join(curraudiodir, audioname)
         audio.write_audiofile(audiofn)
     texts = list()
-    for a in os.listdir(audiodir):
-        file = os.path.join(audiodir, a)
+    for a in os.listdir(curraudiodir):
+        file = os.path.join(curraudiodir, a)
         texts.append(transcribe(file))
     data["Text"] = texts
 
@@ -117,7 +122,7 @@ def extract(videodir, audiodir, cleandatadir, outdir):
     chars_per_sec = list()
     for i in range(len(data)):
         row = data.iloc[i]
-        wps, cps = get_text_rates(row["Duration (s)"], row["Text"])
+        wps, cps = get_text_rates(row["commercial length (seconds)"], row["Text"])
         words_per_sec.append(wps)
         chars_per_sec.append(cps)
     data["WordsPerSec"] = words_per_sec
@@ -137,4 +142,4 @@ def extract(videodir, audiodir, cleandatadir, outdir):
         feat_array = feature_extract(audio, wr, cr, sb)
         features.append(feat_array)
     out = pd.DataFrame(features)
-    out.to_csv(outdir)
+    out.to_csv(feature_filename)
