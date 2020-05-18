@@ -15,14 +15,15 @@ def predict(superdata, otherdata, datapath):
     otherdf = read_features(datapath, otherdata)
     combined = superdf.append(otherdf)
     train, test = train_test_split(df, test_size=0.2)
+    train = train.drop("words", axis=1)
+    train_y = train["issuperbowl"]
+    train = train.drop("issuperbowl", axis=1)
 
-    clf = LogisticRegression(random_state=0).fit(
-        train.drop("words", axis=1), train["issuperbowl"]
-    )
+    clf = LogisticRegression(random_state=0).fit(train, train_y)
 
+    test = test.drop("words", axis=1)
     result = test
-    result["Prediction"] = clf.predict(test.drop("words", axis=1))
-    result["Superbowliness Score"] = [
-        i[1] for i in clf.predict_proba(test.drop("words", axis=1))
-    ]
-    result.to_csv(os.paths.join(datapath, "model results.csv"))
+    test = test.drop("issuperbowl", axis=1)
+    result["Prediction"] = clf.predict(test)
+    result["Superbowliness Score"] = [i[1] for i in clf.predict_proba(test)]
+    result.to_csv(os.path.join(datapath, "model results.csv"))
