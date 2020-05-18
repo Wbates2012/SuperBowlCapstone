@@ -3,5 +3,6 @@
     "superdata": "super",
     "otherdata": "other",
     "datapath": "data",
+    "audiodir": "audio",
     "vizpath": "viz"
 }

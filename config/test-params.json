@@ -3,8 +3,6 @@
     "superdata": "super",
     "otherdata": "other",
     "datapath": "testdata",
-    "vizpath": "viz",
     "audiodir": "audio",
-    "cleandatadir": "testdata/dataframe.csv",
-    "outdir": "testdata/audiofeats"
+    "vizpath": "viz"
 }
