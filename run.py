@@ -4,6 +4,7 @@ import src.ispot_clean as icl
 import src.extract_audio_features as ifx
 import src.video_processing as vid
 import src.vis_video as vis_vid
+import src.predictor as pred
 
 import sys
 import json
@@ -22,6 +23,7 @@ def main():
         vid.dataframe_processor(year, superdata, otherdata, datapath, superdata)
         vid.dataframe_processor(year, superdata, otherdata, datapath, otherdata)
         vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
+        pred.predict(superdata, otherdata, datapath)
         
     if 'clean' in argv:
         cfg = json.load(open('config/clean-params.json'))
@@ -49,6 +51,7 @@ def main():
         ifx.extract(datapath, superdata, audiodir)
         ifx.extract(datapath, otherdata, audiodir)
         vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
+        pred.predict(superdata, otherdata, datapath)
         
 if __name__ == "__main__":
     main()

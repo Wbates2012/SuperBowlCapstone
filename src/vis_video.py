@@ -31,6 +31,6 @@ def get_visualizations(superdata, otherdata, datapath, vizpath):
     superdf = read_features(datapath, superdata)
     otherdf = read_features(datapath, otherdata)
 
-    combined = superfeatures.append(otherfeatures)
+    combined = superdf.append(otherdf)
     for i in combined.columns:
         histvis(combined, i, vizpath)
