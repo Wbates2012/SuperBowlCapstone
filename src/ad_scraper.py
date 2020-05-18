@@ -12,7 +12,7 @@ def get_video_content(link, name, datapath, otherdata):
     try:
         videourl = soup.find("source", {"itemprop": "contentUrl"})["src"]
         videoformat = videourl.split(".")[-1]
-        videofilename = "{0}/{1}/{2}.{3}".format(datapath, otherdata, name, videoformat)
+        videofilename = os.path.join(datapath, otherdata, "%s.%s" % (name, videoformat))
     except:
         print("Error with webpage: " + str(link))
         return None
@@ -38,9 +38,11 @@ def related_videos(brand, year, otherdata, datapath):
         links.append(url)
     data = pd.DataFrame()
     if os.path.exists(datapath):
-        if os.path.exists("%s/dataframe.csv" % (datapath)):
+        if os.path.exists(os.path.join(datapath, "other dataframe.csv")):
             data = pd.read_csv(
-                ("%s/dataframe.csv" % (datapath)), index_col=0, keep_default_na=False
+                os.path.join(datapath, "other dataframe.csv"),
+                index_col=0,
+                keep_default_na=False,
             )
     else:
         os.mkdir(datapath)
@@ -56,22 +58,24 @@ def related_videos(brand, year, otherdata, datapath):
         metadata["URL"] = i
         metadata = metadata.groupby(metadata.index).first()
         data = data.append(metadata, sort=False)
-    data.to_csv("%s/dataframe.csv" % (datapath))
+    data.to_csv(os.path.join(datapath, "other dataframe.csv"))
 
 
 def download_videos(otherdata, datapath):
     sampler = pd.read_csv(
-        ("%s/dataframe.csv" % (datapath)), index_col=0, keep_default_na=False
+        os.path.join(datapath, "other dataframe.csv"),
+        index_col=0,
+        keep_default_na=False,
     )
     sampler = sampler.reset_index(drop=True)
-    sampler.to_csv("%s/dataframe.csv" % (datapath))
+    sampler.to_csv(os.path.join(datapath, "other dataframe.csv"))
     for i, j in sampler.iterrows():
         get_video_content(j["URL"], i, datapath, otherdata)
 
 
 def all_videos(year, otherdata, datapath):
     superdf = pd.read_csv(
-        ("%s/%s.csv" % (datapath, year)), index_col=0, keep_default_na=False
+        os.path.join(datapath, "%s.csv" % (year)), index_col=0, keep_default_na=False
     )
     for i in superdf["Brand"].unique():
         if int(year) < 2020:
