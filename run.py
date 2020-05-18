@@ -28,8 +28,13 @@ def main():
         icl.clean(cfg['rawdatacsv'], cfg['outdir'])
         
     if 'fxt' in argv:
-        cfg = json.load(open('config/fxt-params.json'))
-        ifx.extract(cfg['videodir'], cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
+        cfg = json.load(open('config/data-params.json'))
+        superdata = cfg['superdata']
+        otherdata = cfg['otherdata']
+        datapath = cfg['datapath']
+        audiodir = cfg['audiodir']
+        ifx.extract(datapath, superdata, audiodir)
+        ifx.extract(datapath, otherdata, audiodir)
         
     if 'test-project' in argv:
         cfg = json.load(open('config/test-params.json'))
@@ -37,11 +42,12 @@ def main():
         superdata = cfg['superdata']
         otherdata = cfg['otherdata']
         datapath = cfg['datapath']
+        audiodir = cfg['audiodir']
         vizpath = cfg['vizpath']
-        vid.dataframe_processor(year, superdata, otherdata, datapath)
-        ifx.extract(cfg['videodir'], cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
         vid.dataframe_processor(year, superdata, otherdata, datapath, superdata)
         vid.dataframe_processor(year, superdata, otherdata, datapath, otherdata)
+        ifx.extract(datapath, superdata, audiodir)
+        ifx.extract(datapath, otherdata, audiodir)
         vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
         
 if __name__ == "__main__":
