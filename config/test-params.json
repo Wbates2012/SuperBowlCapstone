@@ -1,10 +1,10 @@
 {
     "year": "2019",
-    "superdata": "videos",
-    "otherdata": "videos",
+    "superdata": "super",
+    "otherdata": "other",
     "datapath": "testdata",
-    "videodir": "testdata/videos",
-    "audiodir": "testdata/audios",
+    "vizpath": "viz",
+    "audiodir": "audio",
     "cleandatadir": "testdata/dataframe.csv",
     "outdir": "testdata/audiofeats"
 }

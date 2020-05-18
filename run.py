@@ -2,6 +2,8 @@ import src.ispot_scrape as ispot
 import src.ad_scraper as ad
 import src.ispot_clean as icl
 import src.extract_audio_features as ifx
+import src.video_processing as vid
+import src.vis_video as vis_vid
 
 import sys
 import json
@@ -14,8 +16,12 @@ def main():
         superdata = cfg['superdata']
         otherdata = cfg['otherdata']
         datapath = cfg['datapath']
+        vizpath = cfg['vizpath']
         ispot.scrape_ispot(year, datapath, superdata)
         ad.all_videos(year, otherdata, datapath)
+        vid.dataframe_processor(year, superdata, otherdata, datapath, superdata)
+        vid.dataframe_processor(year, superdata, otherdata, datapath, otherdata)
+        vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
         
     if 'clean' in argv:
         cfg = json.load(open('config/clean-params.json'))
@@ -25,14 +31,18 @@ def main():
         cfg = json.load(open('config/fxt-params.json'))
         ifx.extract(cfg['videodir'], cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
         
-    if 'test' in argv:
+    if 'test-project' in argv:
         cfg = json.load(open('config/test-params.json'))
         year = cfg['year']
         superdata = cfg['superdata']
         otherdata = cfg['otherdata']
         datapath = cfg['datapath']
+        vizpath = cfg['vizpath']
         vid.dataframe_processor(year, superdata, otherdata, datapath)
         ifx.extract(cfg['videodir'], cfg['audiodir'], cfg['cleandatadir'], cfg['outdir'])
+        vid.dataframe_processor(year, superdata, otherdata, datapath, superdata)
+        vid.dataframe_processor(year, superdata, otherdata, datapath, otherdata)
+        vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
         
 if __name__ == "__main__":
     main()
