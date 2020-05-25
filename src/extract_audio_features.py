@@ -145,15 +145,14 @@ def extract(datapath, videodir, audiodir):
     data["WordsPerSec"] = imp.fit_transform(data["WordsPerSec"].values.reshape(-1, 1))
     data["CharsPerSec"] = imp.fit_transform(data["CharsPerSec"].values.reshape(-1, 1))
 
-    df = data[["WordsPerSec", "CharsPerSec"]]
     features = list()
     sb = 1.0
-    for i in range(len(df)):
+    for i in range(len(data)):
         a = os.listdir(curraudiodir)[i]
         audio = os.path.join(curraudiodir, a)
-        wr = df["WordsPerSec"][i]
-        cr = df["CharsPerSec"][i]
-        sb = df["issuperbowl"][i]
+        wr = data["WordsPerSec"][i]
+        cr = data["CharsPerSec"][i]
+        sb = data["issuperbowl"][i]
         feat_array = feature_extract(audio, sb, wr, cr)
         features.append(feat_array)
     out = pd.DataFrame(features)
