@@ -51,9 +51,12 @@ def related_videos(brand, year, otherdata, datapath):
         os.mkdir(otherdata)
     for i in links:
         pagedata = pd.read_html(i)[0]
-        metadata = pagedata.set_index(0).T.iloc[0][
-            ["Title", "Agency", "Campaign", "Advertiser", "Brand", "Length"]
-        ]
+        pagedata = pagedata.set_index(0).T.reset_index(drop=True).iloc[0]
+        metadata = (
+            pagedata.groupby(pagedata.index)
+            .first()
+            .reindex(["Title", "Agency", "Campaign", "Advertiser", "Brand", "Length"])
+        )
         metadata["Year"] = year
         metadata["URL"] = i
         metadata = metadata.groupby(metadata.index).first()
@@ -73,13 +76,26 @@ def download_videos(otherdata, datapath):
         get_video_content(j["URL"], i, datapath, otherdata)
 
 
-def all_videos(year, otherdata, datapath):
+def expandyear(l):
+    expanded = []
+    for year in l:
+        year = int(year)
+        for i in range(year - 1, year + 2):
+            if i > 2020:
+                continue
+            expanded.append(i)
+    # Unique values only
+    return list(dict.fromkeys(expanded))
+
+
+def all_videos(years, otherdata, datapath):
+    # add one year more and one year less
     superdf = pd.read_csv(
-        os.path.join(datapath, "%s.csv" % (year)), index_col=0, keep_default_na=False
+        os.path.join(datapath, "superbowl.csv"), index_col=0, keep_default_na=False
     )
-    for i in superdf["Brand"].unique():
-        if int(year) < 2020:
-            related_videos(i, int(year) + 1, otherdata, datapath)
-        related_videos(i, int(year), otherdata, datapath)
-        related_videos(i, int(year) - 1, otherdata, datapath)
+    for i in superdf.groupby("Brand")["Year"].apply(list).iteritems():
+        brand = i[0]
+        yearrange = expandyear(i[1])
+        for year in yearrange:
+            related_videos(brand, year, otherdata, datapath)
     download_videos(otherdata, datapath)

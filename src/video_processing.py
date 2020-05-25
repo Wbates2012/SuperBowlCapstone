@@ -135,11 +135,12 @@ def dataframe_processor(year, superdata, otherdata, datapath, whichdata):
     videodata = pd.DataFrame()
     info = pd.Series()
     for i in files:
-        print(i)
-        info = pd.Series()
-        info.name = i
-        info = video_features(i, info)
-        videodata = videodata.append(info)
+        if os.path.isfile(i):
+            print(i)
+            info = pd.Series()
+            info.name = i
+            info = video_features(i, info)
+            videodata = videodata.append(info)
     if whichdata == superdata:
         videodata["issuperbowl"] = 1
     else:

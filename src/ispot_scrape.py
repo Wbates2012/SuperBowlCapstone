@@ -26,12 +26,12 @@ def get_page_links(year):
     return links
 
 
-def extract_data(link):
+def extract_data(link, year):
     doc = requests.get(link)
     soup = BeautifulSoup(doc.text)
 
     if len(soup.find_all("div", {"class": "jwplayer"})) < 1:  # Check if video exists
-        return np.full(9, np.NaN)  # If not, return NaNs
+        return np.full(10, np.NaN)  # If not, return NaNs
     inner = [soup.find_all("div", {"class": "jwplayer"})[0]["data-mp4"]]  # Video link
     inner.append(soup.find_all("meta", {"itemprop": "name"})[0]["content"])  # Title
     inner.append(
@@ -53,6 +53,7 @@ def extract_data(link):
     inner.append(
         soup.find_all("div", {"class": "col-12 mb-3 pl-0"})[0].find("a").text.strip()
     )  # Brand Name
+    inner.append(year)  # Year
 
     return inner
 
@@ -70,37 +71,44 @@ def create_df(data):
             "First Occurance",
             "Last Occurance",
             "Brand",
+            "Year",
         ],
-    )
+    ).dropna()
 
 
 ##############################################
 
 # Year is year of analysis
 # superdata is something like 'videos'
-def scrape_ispot(year, datapath, superdata):
-
+def scrape_ispot(years, datapath, superdata):
     if datapath:
         if not os.path.exists(datapath):
             os.makedirs(datapath)
-    video_pages = get_page_links(year)
+    for year in years:
+        video_pages = get_page_links(year)
 
-    data = list()
-    for url in video_pages:
-        data.append(extract_data(url))
-    df = create_df(data)
+        data = list()
+        for url in video_pages:
+            data.append(extract_data(url, year))
+        df = create_df(data)
 
-    # Download metadata as CSV
-    name = str(year) + ".csv"
-    out_df = os.path.join(datapath, name)
-    df.to_csv(out_df)
-
+        # Download metadata as CSV, append if CSV already exists
+        out_df = os.path.join(datapath, "superbowl.csv")
+        if os.path.exists(out_df):
+            data = pd.read_csv(out_df, index_col=0, keep_default_na=False,)
+            df = pd.concat([data, df], ignore_index=True)
+        df.to_csv(out_df)
     # Download videos by ad-ID
     superdata = os.path.join(datapath, superdata)
     if not os.path.exists(superdata):
         os.makedirs(superdata)
-    for i in range(len(df)):
-        video = df["mp4"][i]
-        name = str(df["Ad ID"][i]) + ".mp4"
+    for _, i in df.iterrows():
+        # Skip rows without data
+        video = i["mp4"]
+        name = str(i["Ad ID"]) + ".mp4"
         outlink = os.path.join(superdata, name)
-        urllib.request.urlretrieve(video, outlink)
+        try:
+            urllib.request.urlretrieve(video, outlink)
+        except:
+            print("Error: Unable to download %s" % (name))
+            print("URL: %s" % (video))

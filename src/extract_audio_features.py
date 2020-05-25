@@ -98,7 +98,7 @@ def feature_extract(mp3_file, wordrate, charrate, sb=1.0, n_mfcc=20):
 
 def extract(datapath, videodir, audiodir):
 
-    feature_filename = "%s features.csv" % (videodir)
+    feature_filename = "%s audio features.csv" % (videodir)
     feature_filename = os.path.join(datapath, feature_filename)
     data = pd.read_csv(feature_filename, index_col=0)
 
@@ -106,10 +106,10 @@ def extract(datapath, videodir, audiodir):
     curraudiodir = os.path.join(directory, audiodir)
     if not os.path.exists(curraudiodir):
         os.mkdir(curraudiodir)
-
     for v in os.listdir(directory):
-        if not v == curraudiodir:
-            video = VideoFileClip(os.path.join(directory, v))
+        vpath = os.path.join(directory, v)
+        if os.path.isfile(vpath):
+            video = VideoFileClip(vpath)
             audio = video.audio
             audioname = v[:-4] + ".mp3"
             audiofn = os.path.join(curraudiodir, audioname)
@@ -117,7 +117,8 @@ def extract(datapath, videodir, audiodir):
     texts = list()
     for a in os.listdir(curraudiodir):
         file = os.path.join(curraudiodir, a)
-        texts.append(transcribe(file))
+        text = transcribe(file)
+        texts.append(text)
     data["Text"] = texts
 
     words_per_sec = list()
@@ -137,8 +138,8 @@ def extract(datapath, videodir, audiodir):
     features = list()
     sb = 1.0
     for i in range(len(df)):
-        a = os.listdir(audiodir)[i]
-        audio = os.path.join(audiodir, a)
+        a = os.listdir(curraudiodir)[i]
+        audio = os.path.join(curraudiodir, a)
         wr = df["WordsPerSec"][i]
         cr = df["CharsPerSec"][i]
         feat_array = feature_extract(audio, wr, cr, sb)

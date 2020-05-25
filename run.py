@@ -11,17 +11,30 @@ import json
 
 def main():
     argv = sys.argv
-    if 'data' in argv:
+    if 'pleasework' in argv:
         cfg = json.load(open('config/data-params.json'))
-        year = cfg['year']
+        years = cfg['years']
         superdata = cfg['superdata']
         otherdata = cfg['otherdata']
         datapath = cfg['datapath']
         vizpath = cfg['vizpath']
-        ispot.scrape_ispot(year, datapath, superdata)
-        ad.all_videos(year, otherdata, datapath)
-        vid.dataframe_processor(year, superdata, otherdata, datapath, superdata)
-        vid.dataframe_processor(year, superdata, otherdata, datapath, otherdata)
+        ad.all_videos(years, otherdata, datapath)
+        vid.dataframe_processor(years, superdata, otherdata, datapath, superdata)
+        vid.dataframe_processor(years, superdata, otherdata, datapath, otherdata)
+        vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
+        pred.predict(superdata, otherdata, datapath)
+        
+    if 'data' in argv:
+        cfg = json.load(open('config/data-params.json'))
+        years = cfg['years']
+        superdata = cfg['superdata']
+        otherdata = cfg['otherdata']
+        datapath = cfg['datapath']
+        vizpath = cfg['vizpath']
+        ispot.scrape_ispot(years, datapath, superdata)
+        ad.all_videos(years, otherdata, datapath)
+        vid.dataframe_processor(years, superdata, otherdata, datapath, superdata)
+        vid.dataframe_processor(years, superdata, otherdata, datapath, otherdata)
         vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
         pred.predict(superdata, otherdata, datapath)
         
