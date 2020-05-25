@@ -38,59 +38,70 @@ def get_text_rates(dur, text):
     return (wordrate, charrate)
 
 
-def feature_extract(mp3_file, wordrate, charrate, sb=1.0, n_mfcc=20):
-
+def feature_extract(mp3_file, sb, wr, cr, n_mfcc=20):
+    
     x, sr = librosa.load(mp3_file)
-
-    spec_features = [
-        librosa.feature.spectral_centroid,
-        librosa.feature.spectral_bandwidth,
-        librosa.feature.spectral_contrast,
-        librosa.feature.spectral_flatness,
-        librosa.feature.spectral_rolloff,
-    ]
-
-    raw_feats = list()
+    
+    spec_features = [librosa.feature.spectral_centroid, librosa.feature.spectral_bandwidth,
+                 librosa.feature.spectral_contrast, librosa.feature.spectral_flatness,
+                 librosa.feature.spectral_rolloff]
+    
+    raw_feats = [mp3_file, sb, wr, cr]
     # Add spectral features
     for f in spec_features:
         # Get raw features from function call
         raw_feat_f = f(x)
         # Add each feature one-by-one
         for row in raw_feat_f:
-            raw_feats.append(row)
+            avg = np.mean(row)
+            raw_feats.append(avg)
+            dev = np.std(row)
+            raw_feats.append(dev)
+            
     # MFCCs
     f = librosa.feature.mfcc
     raw_feat = f(x, sr, n_mfcc=n_mfcc)
     for row in raw_feat:
-        raw_feats.append(row)
+        avg = np.mean(row)
+        raw_feats.append(avg)
+        dev = np.std(row)
+        raw_feats.append(dev)
+        
     # Zero crossing rate
     f = librosa.feature.zero_crossing_rate
     raw_feat = f(x)
     for row in raw_feat:
-        raw_feats.append(row)
-    # Chromagram
+        avg = np.mean(row)
+        raw_feats.append(avg)
+        dev = np.std(row)
+        raw_feats.append(dev)
+        
+    # Chromagram    
     f = librosa.feature.chroma_stft
     raw_feat = f(x, sr)
     for row in raw_feat:
-        raw_feats.append(row)
+        avg = np.mean(row)
+        raw_feats.append(avg)
+        dev = np.std(row)
+        raw_feats.append(dev)
+    
     # Tonnetz
     f = librosa.feature.tonnetz
     raw_feat = f(x, sr)
     for row in raw_feat:
-        raw_feats.append(row)
-    """
+        avg = np.mean(row)
+        raw_feats.append(avg)
+        dev = np.std(row)
+        raw_feats.append(dev)
+        
+    '''
     f = librosa.feature.fourier_tempogram
     raw_feat = f(x, sr)
     for row in raw_feat:
         raw_feats.append(row)
-    """
+    '''  
 
-    transposed = list(map(list, zip(*raw_feats)))
-    audio_feats = pd.DataFrame(transposed)
-
-    feats1d = audio_feats.values.flatten()
-
-    return np.concatenate((np.array([sb, wordrate, charrate]), feats1d))
+    return raw_feats
 
 
 ########################
@@ -142,7 +153,9 @@ def extract(datapath, videodir, audiodir):
         audio = os.path.join(curraudiodir, a)
         wr = df["WordsPerSec"][i]
         cr = df["CharsPerSec"][i]
-        feat_array = feature_extract(audio, wr, cr, sb)
+        sb = df["issuperbowl"][i]
+        feat_array = feature_extract(audio, sb, wr, cr)
         features.append(feat_array)
     out = pd.DataFrame(features)
+    
     out.to_csv(feature_filename)
