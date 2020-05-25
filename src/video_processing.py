@@ -134,13 +134,22 @@ def dataframe_processor(year, superdata, otherdata, datapath, whichdata):
 
     videodata = pd.DataFrame()
     info = pd.Series()
-    for i in files:
+    for count, i in enumerate(files):
         if os.path.isfile(i):
             print(i)
             info = pd.Series()
             info.name = i
             info = video_features(i, info)
             videodata = videodata.append(info)
+        if count % 50 == 0:
+            if whichdata == superdata:
+                videodata["issuperbowl"] = 1
+            else:
+                        videodata["issuperbowl"] = 0
+            output_filename = "%s features.csv" % (whichdata)
+            output_filename = os.path.join(datapath, output_filename)
+            videodata.to_csv(output_filename)
+            
     if whichdata == superdata:
         videodata["issuperbowl"] = 1
     else:

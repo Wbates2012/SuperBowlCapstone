@@ -12,6 +12,8 @@ def get_video_content(link, name, datapath, otherdata):
     try:
         videourl = soup.find("source", {"itemprop": "contentUrl"})["src"]
         videoformat = videourl.split(".")[-1]
+        if videoformat != 'mp4':
+            return None
         videofilename = os.path.join(datapath, otherdata, "%s.%s" % (name, videoformat))
     except:
         print("Error with webpage: " + str(link))

@@ -109,7 +109,7 @@ def feature_extract(mp3_file, sb, wr, cr, n_mfcc=20):
 
 def extract(datapath, videodir, audiodir):
 
-    feature_filename = "%s audio features.csv" % (videodir)
+    feature_filename = "%s features.csv" % (videodir)
     feature_filename = os.path.join(datapath, feature_filename)
     data = pd.read_csv(feature_filename, index_col=0)
 
@@ -156,5 +156,6 @@ def extract(datapath, videodir, audiodir):
         feat_array = feature_extract(audio, sb, wr, cr)
         features.append(feat_array)
     out = pd.DataFrame(features)
-    
+    feature_filename = "%s audio features.csv" % (videodir)
+    feature_filename = os.path.join(datapath, feature_filename)
     out.to_csv(feature_filename)
