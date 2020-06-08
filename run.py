@@ -47,8 +47,8 @@ def main():
         datapath = cfg['datapath']
         audiodir = cfg['audiodir']
         vizpath = cfg['vizpath']
-        vid.dataframe_processor(years, superdata, otherdata, datapath, superdata)
-        vid.dataframe_processor(years, superdata, otherdata, datapath, otherdata)
+        vid.dataframe_processor(superdata, otherdata, datapath, superdata)
+        vid.dataframe_processor(superdata, otherdata, datapath, otherdata)
         ifx.extract(datapath, superdata, audiodir)
         ifx.extract(datapath, otherdata, audiodir)
         vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
