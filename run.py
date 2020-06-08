@@ -20,9 +20,9 @@ def main():
         datapath = cfg['datapath']
         vizpath = cfg['vizpath']
         ispot.scrape_ispot(years, datapath, superdata)
-        ad.all_videos(years, otherdata, datapath)
-        vid.dataframe_processor(years, superdata, otherdata, datapath, superdata)
-        vid.dataframe_processor(years, superdata, otherdata, datapath, otherdata)
+        ad.all_videos(otherdata, datapath)
+        vid.dataframe_processor(superdata, otherdata, datapath, superdata)
+        vid.dataframe_processor(superdata, otherdata, datapath, otherdata)
         vis_vid.get_visualizations(superdata, otherdata, datapath, vizpath)
         pred.predict(superdata, otherdata, datapath)
         
