@@ -16,7 +16,7 @@ def predict(superdata, otherdata, datapath):
     combined = superdf.append(otherdf)
     combined = combined.drop('words', axis=1)
     combined = combined.drop('ID', axis=1)
-    train, test = train_test_split(df, test_size=0.2)
+    train, test = train_test_split(combined, test_size=0.2)
     train_y = train['issuperbowl']
     train = train.drop('issuperbowl', axis=1)
 

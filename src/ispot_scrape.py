@@ -93,7 +93,7 @@ def scrape_ispot(years, datapath, superdata):
         df = create_df(data)
 
         # Download metadata as CSV, append if CSV already exists
-        out_df = os.path.join(datapath, "superbowl.csv")
+        out_df = os.path.join(datapath, "superbowl dataframe.csv")
         if os.path.exists(out_df):
             data = pd.read_csv(out_df, index_col=0, keep_default_na=False,)
             df = pd.concat([data, df], ignore_index=True)

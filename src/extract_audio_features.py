@@ -11,21 +11,26 @@ from pydub import AudioSegment
 from sklearn.impute import SimpleImputer
 
 
-def transcribe(mp3):
 
+def transcribe(mp3):
     sound = AudioSegment.from_mp3(mp3)
     sound.export("placehold.wav", format="wav")
     wave_file = "placehold.wav"
 
     god = sr.Recognizer()
-    with sr.AudioFile(wave_file) as spoken:
-        audio = god.record(spoken)
-        tries = god.recognize_google(audio, show_all=True)
-        if len(tries) == 0:
-            transcript = "Fail"
-        else:
-            transcript = tries["alternative"][0]["transcript"]
-    return transcript
+    try:
+        with sr.AudioFile(wave_file) as spoken:
+            audio = god.record(spoken)
+            tries = god.recognize_google(audio, show_all=True)
+            if len(tries) == 0:
+                transcript = "Fail"
+            else:
+                transcript = tries["alternative"][0]["transcript"]
+        return transcript
+    except:
+        print("Error getting words from %s" % (mp3))
+        transcript = "Fail"
+        return transcript
 
 
 def get_text_rates(dur, text):
@@ -38,15 +43,14 @@ def get_text_rates(dur, text):
     return (wordrate, charrate)
 
 
-def feature_extract(mp3_file, sb, wr, cr, n_mfcc=20):
-    
+def feature_extract(video, mp3_file, wr, cr, n_mfcc=20):
     x, sr = librosa.load(mp3_file)
     
     spec_features = [librosa.feature.spectral_centroid, librosa.feature.spectral_bandwidth,
                  librosa.feature.spectral_contrast, librosa.feature.spectral_flatness,
                  librosa.feature.spectral_rolloff]
     
-    raw_feats = [mp3_file, sb, wr, cr]
+    raw_feats = [video, mp3_file, wr, cr]
     # Add spectral features
     for f in spec_features:
         # Get raw features from function call
@@ -120,41 +124,60 @@ def extract(datapath, videodir, audiodir):
     for v in os.listdir(directory):
         vpath = os.path.join(directory, v)
         if os.path.isfile(vpath):
-            video = VideoFileClip(vpath)
-            audio = video.audio
             audioname = v[:-4] + ".mp3"
             audiofn = os.path.join(curraudiodir, audioname)
-            audio.write_audiofile(audiofn)
-    texts = list()
-    for a in os.listdir(curraudiodir):
-        file = os.path.join(curraudiodir, a)
-        text = transcribe(file)
-        texts.append(text)
-    data["Text"] = texts
+            if not os.path.exists(audiofn):
+                try:
+                    video = VideoFileClip(vpath)
+                    audio = video.audio
+                    audio.write_audiofile(audiofn)
+                except:
+                    print("Error writing %s, file skipped" % (audiofn))
+    
+    tempfeats = list()
+    for num, pair in enumerate(data.iterrows()):
+        index = pair[0]
+        row = pair[1]
+        audioname = str(row['ID']) + ".mp3"
+        audiofn = os.path.join(curraudiodir, audioname)
+        if os.path.exists(audiofn):
+            try:
+                text = transcribe(audiofn)
+                wps, cps = get_text_rates(row["commercial length (seconds)"], text)
+                feat_array = [index, audiofn, wps, cps]
+                tempfeats.append(feat_array)
+            except:
+                print("Issue with %s, file skipped" % (audiofn))
 
-    words_per_sec = list()
-    chars_per_sec = list()
-    for i in range(len(data)):
-        row = data.iloc[i]
-        wps, cps = get_text_rates(row["commercial length (seconds)"], row["Text"])
-        words_per_sec.append(wps)
-        chars_per_sec.append(cps)
-    data["WordsPerSec"] = words_per_sec
-    data["CharsPerSec"] = chars_per_sec
+    tempout = pd.DataFrame(tempfeats)
+    tempout.columns = ['videofilename', 'audiofilename', 'WordsPerSec', 'CharsPerSec']
+    tempout = tempout.set_index('videofilename')
+    tempfeature_filename = "%s mid audio features.csv" % (videodir)
+    tempfeature_filename = os.path.join(datapath, tempfeature_filename)
+    tempout = data.join(tempout)
+    tempout.to_csv(tempfeature_filename)
+
+    data = tempout
+
     imp = SimpleImputer(missing_values=np.nan, strategy="mean")
     data["WordsPerSec"] = imp.fit_transform(data["WordsPerSec"].values.reshape(-1, 1))
     data["CharsPerSec"] = imp.fit_transform(data["CharsPerSec"].values.reshape(-1, 1))
 
     features = list()
     sb = 1.0
-    for i in range(len(data)):
-        a = os.listdir(curraudiodir)[i]
-        audio = os.path.join(curraudiodir, a)
-        wr = data["WordsPerSec"][i]
-        cr = data["CharsPerSec"][i]
-        sb = data["issuperbowl"][i]
-        feat_array = feature_extract(audio, sb, wr, cr)
-        features.append(feat_array)
+    for num, pair in enumerate(data.iterrows()):
+        index = pair[0]
+        row = pair[1]
+        try:
+            audio = row['audiofilename']
+            wr = row["WordsPerSec"]
+            cr = row["CharsPerSec"]
+            sb = row["issuperbowl"]
+            feat_array = feature_extract(index, audio, wr, cr)
+            features.append(feat_array)
+        except:
+            print("Issue with %s, file skipped" % (index))
+            
     out = pd.DataFrame(features)
     feature_filename = "%s audio features.csv" % (videodir)
     feature_filename = os.path.join(datapath, feature_filename)
