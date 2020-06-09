@@ -166,7 +166,7 @@ def dataframe_processor(superdata, otherdata, datapath, whichdata):
             try:
                 info = pd.Series()
                 info.name = filepath
-                info.ID = i
+                info.ID = i[:-4]
                 info = video_features(filepath, info)
                 videodata = videodata.append(info)
             except:
