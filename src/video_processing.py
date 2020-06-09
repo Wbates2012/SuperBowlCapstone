@@ -13,11 +13,12 @@ from scenedetect.detectors import ContentDetector
 import string
 import pytesseract
 
+
 def hsv_image(img):
-    '''
+    """
     converts RGB (or grayscale) image to HSV image
     :param: img: image to be converted to HSV
-    '''
+    """
     if img.ndim > 2:
         hsv_img = rgb2hsv(img)
         hue_img = hsv_img[:, :, 0]
@@ -31,18 +32,18 @@ def hsv_image(img):
 
 
 def averaged(a):
-    '''
+    """
     gets overall average of 2D array (or matrix)
     :param: a: 2D array (or matrix) to be averaged
-    '''
+    """
     return np.mean(a, axis=(0, 1))
 
 
 def scenes(video):
-    '''
+    """
     convert video file into list of scenes based on frame range and fps
     :param: video: video filename
-    '''
+    """
     video_manager = VideoManager([video])
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
@@ -54,10 +55,10 @@ def scenes(video):
 
 
 def scenemidframe(scene_list):
-    '''
+    """
     convert scene list into list of frame midpoints for individual frame processing
     :param: scene_list: list of scene ranges
-    '''
+    """
     midpoints = [
         int(sum(points.get_frames() for points in scene) / len(scene))
         for scene in scene_list
@@ -66,17 +67,17 @@ def scenemidframe(scene_list):
 
 
 def get_text(images):
-    '''
+    """
     get list of words from list of images using OCR
     :param: images: list of images
-    '''
+    """
     results = []
-    #Convert images to grayscale before collecting text
+    # Convert images to grayscale before collecting text
     for img in images:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         text = pytesseract.image_to_string(gray)
         results.append(text)
-    #Split words and clean/filter out small words and watermark (adforum)
+    # Split words and clean/filter out small words and watermark (adforum)
     words = [i.split() for i in results]
     removepunct = str.maketrans("", "", string.punctuation)
     words = [i.translate(removepunct) for ilist in words for i in ilist]
@@ -85,10 +86,10 @@ def get_text(images):
 
 
 def face_count(images):
-    '''
+    """
     get count of faces detected in images
     :param: images: list of images
-    '''
+    """
     facedetector = cv2.CascadeClassifier(
         cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     )
@@ -100,11 +101,11 @@ def face_count(images):
 
 
 def video_features(video, info):
-    '''
+    """
     wrapper for collecting all visual features from a given video
     :param: video: video filename
     :param: info: series to append features to and return
-    '''
+    """
     rawvideofeatures = pd.DataFrame()
     videofeatures = info
     scenelist = scenes(video)
@@ -114,7 +115,7 @@ def video_features(video, info):
     num_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     frame_count = 0
     images = []
-    #Get all midpoint images
+    # Get all midpoint images
     while frame_count < num_frames:
         ret, frame = cap.read()
         if frame_count in midpoints:
@@ -123,7 +124,7 @@ def video_features(video, info):
     cap.release()
     cv2.destroyAllWindows()
 
-    #Get Basic Visual Features
+    # Get Basic Visual Features
     for num, i in enumerate(images):
         temp = pd.Series()
         temp.name = num
@@ -134,8 +135,8 @@ def video_features(video, info):
         rawvideofeatures = rawvideofeatures.append(temp)
     videofeatures["commercial length (seconds)"] = float(scenelist[-1][-1])
     videofeatures["number of scenes"] = len(scenelist)
-    
-    #More advanced features
+
+    # More advanced features
     videofeatures["words"] = get_text(images)
     videofeatures["average word count per scene"] = len(videofeatures["words"]) / len(
         images
@@ -147,13 +148,13 @@ def video_features(video, info):
 
 
 def dataframe_processor(superdata, otherdata, datapath, whichdata):
-    '''
+    """
     wrapper for collecting all visual features for a given dataframe of commercials
     :param: superdata: directory in datapath that holds raw superbowl data
     :param: otherdata: directory in datapath that holds raw non-superbowl data
     :param: datapath: directory of data path
     :param: whichdata: which category of data to use
-    '''
+    """
     directory = os.path.join(datapath, whichdata)
     files = [os.path.join(directory, i) for i in os.listdir(directory)]
 
@@ -168,8 +169,7 @@ def dataframe_processor(superdata, otherdata, datapath, whichdata):
                 videodata = videodata.append(info)
             except:
                 print("Error collecting video features for %s, skipped." % (i))
-    
-    #Categorize features
+    # Categorize features
     if whichdata == superdata:
         videodata["issuperbowl"] = 1
     else:
