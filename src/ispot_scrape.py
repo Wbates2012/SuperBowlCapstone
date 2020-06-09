@@ -9,7 +9,10 @@ import numpy as np
 
 
 def get_page_links(year):
-
+    '''
+    collects URLs for all superbowl commercials in given year
+    :param: year: year for the search
+    '''
     # HTML of search page
     search_page = "https://www.ispot.tv/events/" + str(year) + "-super-bowl-commercials"
     doc = requests.get(search_page)
@@ -27,6 +30,11 @@ def get_page_links(year):
 
 
 def extract_data(link, year):
+    '''
+    collects data from given URL
+    :param: link: superbowl commercial URL
+    :param: year: year collected from
+    '''
     doc = requests.get(link)
     soup = BeautifulSoup(doc.text)
 
@@ -59,6 +67,10 @@ def extract_data(link, year):
 
 
 def create_df(data):
+    '''
+    creates dataframe
+    :param: data: scraped unlabelled data
+    '''
     return pd.DataFrame(
         data,
         columns=[
@@ -78,9 +90,13 @@ def create_df(data):
 
 ##############################################
 
-# Year is year of analysis
-# superdata is something like 'videos'
 def scrape_ispot(years, datapath, superdata):
+    '''
+    wrapper for collecting all superbowl commercials and respective dataframe
+    :param: years: chosen years to collect superbowl commercials
+    :param: datapath: directory of data path
+    :param: superdata: directory in datapath to hold raw superbowl data
+    '''
     if datapath:
         if not os.path.exists(datapath):
             os.makedirs(datapath)
