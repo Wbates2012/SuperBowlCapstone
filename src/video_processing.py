@@ -133,6 +133,7 @@ def video_features(video, info):
         temp["mean saturation"] = averaged(saturation_img)
         temp["mean brightness"] = averaged(value_img)
         rawvideofeatures = rawvideofeatures.append(temp)
+    videofeatures["ID"] = info.ID
     videofeatures["commercial length (seconds)"] = float(scenelist[-1][-1])
     videofeatures["number of scenes"] = len(scenelist)
 
