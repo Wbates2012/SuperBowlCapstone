@@ -21,7 +21,7 @@ def main():
     '''
     argv = sys.argv
         
-    #Downlaod commercials and their dataframes
+    #Download commercials and their dataframes
     if 'data' in argv:
         cfg = json.load(open('config/data-params.json'))
         years = cfg['years']
