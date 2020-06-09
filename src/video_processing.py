@@ -156,19 +156,20 @@ def dataframe_processor(superdata, otherdata, datapath, whichdata):
     :param: whichdata: which category of data to use
     """
     directory = os.path.join(datapath, whichdata)
-    files = [os.path.join(directory, i) for i in os.listdir(directory)]
 
     videodata = pd.DataFrame()
     info = pd.Series()
-    for i in files:
-        if os.path.isfile(i):
+    for i in os.listdir(directory):
+        filepath = os.path.join(directory, i)
+        if os.path.isfile(filepath):
             try:
                 info = pd.Series()
-                info.name = i
-                info = video_features(i, info)
+                info.name = filepath
+                info.ID = i
+                info = video_features(filepath, info)
                 videodata = videodata.append(info)
             except:
-                print("Error collecting video features for %s, skipped." % (i))
+                print("Error collecting video features for %s, skipped." % (filepath))
     # Categorize features
     if whichdata == superdata:
         videodata["issuperbowl"] = 1
