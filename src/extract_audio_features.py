@@ -13,6 +13,10 @@ from sklearn.impute import SimpleImputer
 
 
 def transcribe(mp3):
+    '''
+    transcribes audio to words
+    :param: mp3: audio file
+    '''
     sound = AudioSegment.from_mp3(mp3)
     sound.export("placehold.wav", format="wav")
     wave_file = "placehold.wav"
@@ -34,6 +38,11 @@ def transcribe(mp3):
 
 
 def get_text_rates(dur, text):
+    '''
+    finds words and characters per second
+    :param: dur: duration of audio file
+    :param: text: transcribed text from audio file
+    '''
     if text != "Fail":
         wordrate = len(text.split()) / dur
         charrate = len(text) / dur
@@ -44,6 +53,14 @@ def get_text_rates(dur, text):
 
 
 def feature_extract(video, mp3_file, wr, cr, n_mfcc=20):
+    '''
+    main feature extraction, based off of spectral features
+    :param: video: name of video file
+    :param: mp3_file: name of audio file
+    :param: wr: words per second feature
+    :param: cr: characters per second feature
+    :param: n_mfcc: number of mfcc features, optional
+    '''
     x, sr = librosa.load(mp3_file)
     
     spec_features = [librosa.feature.spectral_centroid, librosa.feature.spectral_bandwidth,
@@ -98,13 +115,6 @@ def feature_extract(video, mp3_file, wr, cr, n_mfcc=20):
         dev = np.std(row)
         raw_feats.append(dev)
         
-    '''
-    f = librosa.feature.fourier_tempogram
-    raw_feat = f(x, sr)
-    for row in raw_feat:
-        raw_feats.append(row)
-    '''  
-
     return raw_feats
 
 
@@ -112,11 +122,17 @@ def feature_extract(video, mp3_file, wr, cr, n_mfcc=20):
 
 
 def extract(datapath, videodir, audiodir):
-
+    '''
+    wrapper for collecting all audio features for a given dataframe of commercials
+    :param: datapath: directory of data path
+    :param: videodir: chosen category of data to use
+    :arg: audiodir: directory of audio files in repective datafolder
+    '''
     feature_filename = "%s features.csv" % (videodir)
     feature_filename = os.path.join(datapath, feature_filename)
     data = pd.read_csv(feature_filename, index_col=0)
 
+    #mp3 creation
     directory = os.path.join(datapath, videodir)
     curraudiodir = os.path.join(directory, audiodir)
     if not os.path.exists(curraudiodir):
@@ -126,6 +142,7 @@ def extract(datapath, videodir, audiodir):
         if os.path.isfile(vpath):
             audioname = v[:-4] + ".mp3"
             audiofn = os.path.join(curraudiodir, audioname)
+            #Make sure mp3 doesn't already exist
             if not os.path.exists(audiofn):
                 try:
                     video = VideoFileClip(vpath)
@@ -135,6 +152,7 @@ def extract(datapath, videodir, audiodir):
                     print("Error writing %s, file skipped" % (audiofn))
     
     tempfeats = list()
+    #Signal based features
     for num, pair in enumerate(data.iterrows()):
         index = pair[0]
         row = pair[1]
@@ -149,6 +167,7 @@ def extract(datapath, videodir, audiodir):
             except:
                 print("Issue with %s, file skipped" % (audiofn))
 
+    #Hold midpoint versions of audio features
     tempout = pd.DataFrame(tempfeats)
     tempout.columns = ['videofilename', 'audiofilename', 'WordsPerSec', 'CharsPerSec']
     tempout = tempout.set_index('videofilename')
@@ -159,10 +178,12 @@ def extract(datapath, videodir, audiodir):
 
     data = tempout
 
+    #Imputes missing values from signal features
     imp = SimpleImputer(missing_values=np.nan, strategy="mean")
     data["WordsPerSec"] = imp.fit_transform(data["WordsPerSec"].values.reshape(-1, 1))
     data["CharsPerSec"] = imp.fit_transform(data["CharsPerSec"].values.reshape(-1, 1))
 
+    #Spectral features and combining
     features = list()
     sb = 1.0
     for num, pair in enumerate(data.iterrows()):
@@ -177,7 +198,8 @@ def extract(datapath, videodir, audiodir):
             features.append(feat_array)
         except:
             print("Issue with %s, file skipped" % (index))
-            
+    
+    #Merge audio and visual features into one dataframe
     out = pd.DataFrame(features)
     feature_filename = "%s features.csv" % (videodir)
     feature_filename = os.path.join(datapath, feature_filename)
