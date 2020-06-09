@@ -179,6 +179,9 @@ def extract(datapath, videodir, audiodir):
             print("Issue with %s, file skipped" % (index))
             
     out = pd.DataFrame(features)
-    feature_filename = "%s audio features.csv" % (videodir)
+    feature_filename = "%s features.csv" % (videodir)
     feature_filename = os.path.join(datapath, feature_filename)
+    videodata = pd.read_csv(feature_filename, index_col=0, keep_default_na=False)
+    out = out.set_index('0').drop('1', axis=1)
+    out = out.join(videodata)
     out.to_csv(feature_filename)
