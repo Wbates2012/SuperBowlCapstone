@@ -3,7 +3,7 @@
 * Contact email: cfranken, wbates (@ucsd.edu)
 
 Materials: 
-* [Website](https://furbeh.github.io/SuperBowlCapstoneWebPage/)
+* [Website](https://chatsonf.github.io/SuperBowlCapstoneWebPage/)
 * [Presentation](https://vimeo.com/430842102)
 * [Updated Presentation Slides](https://docs.google.com/presentation/d/1FktHf1JZBBYm8WkiyY9Ce1XPOi9XqAeOePjYjbH0hWE/edit?usp=sharing)
 * [Project Report](https://drive.google.com/file/d/1FgO24ujWUXjq8vkLYdiR3ezzCbOutoCW/view)
